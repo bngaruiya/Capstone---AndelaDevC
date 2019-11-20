@@ -4,11 +4,14 @@
   "description": "This is the Capstone project for the Andela DevC Training",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "test": "(dropdb --if-exists testTeamWork && createdb -O benah testTeamWork) && cross-env NODE_ENV=test mocha"
   },
   "author": "Bernard Ngaruiya",
   "license": "ISC",
   "devDependencies": {
+    "chai": "^4.2.0",
     "eslint": "^6.6.0",
     "eslint-config-airbnb": "^18.0.1",
     "eslint-config-node": "^4.0.0",
@@ -19,11 +22,14 @@
     "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-react": "^7.16.0",
     "eslint-plugin-react-hooks": "^2.3.0",
+    "mocha": "^6.2.2",
     "nodemon": "^1.19.4",
-    "prettier": "^1.19.1"
+    "prettier": "^1.19.1",
+    "supertest": "^4.0.2"
   },
   "dependencies": {
     "body-parser": "^1.19.0",
+    "cross-env": "^6.0.3",
     "express": "^4.17.1",
     "knex": "^0.20.2",
     "pg": "^7.13.0"
