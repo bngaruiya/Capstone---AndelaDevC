@@ -40,12 +40,37 @@ describe('CRUD Articles', () => {
   });
   it('Should create an article', done => {
     request(app)
-      .post('/api/v1/stickers/')
+      .post('/api/v1/articles/')
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
       .expect(200)
       .then(response => {
         expect(response.body).to.be.a('object');
+      });
+    done();
+  });
+  it('Should update an article', done => {
+    request(app)
+      .put('/api/v1/articles/10')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .then(response => {
+        expect(response.body).to.be.a('object');
+      });
+    done();
+  });
+  it('Should delete an article', done => {
+    request(app)
+      .delete('/api/v1/articles/10')
+      .set('Accept', 'application/json')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .then(response => {
+        expect(response.body).to.be.a('object');
+        expect(response.body).to.deep.equal({
+          deleted: true
+        });
       });
     done();
   });

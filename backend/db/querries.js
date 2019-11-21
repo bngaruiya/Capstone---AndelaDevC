@@ -11,5 +11,15 @@ module.exports = {
   },
   create(article) {
     return knex('articles').insert(article, '*');
+  },
+  update(id, article) {
+    return knex('articles')
+      .where('id', id)
+      .update(article, '*');
+  },
+  delete(id) {
+    return knex('articles')
+      .where('id', id)
+      .del();
   }
 };
