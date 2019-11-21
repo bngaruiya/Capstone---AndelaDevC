@@ -2,7 +2,7 @@ const express = require('express');
 
 const router = express.Router();
 
-const querries = require('../db/querries');
+const querries = require('../db/articleQueries');
 
 function isValidId(req, res, next) {
   if (!isNaN(req.params.id)) {
