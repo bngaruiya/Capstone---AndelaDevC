@@ -12,6 +12,14 @@ function isValidId(req, res, next) {
   }
 }
 
+function validArticle(article) {
+  const hasTitle =
+    typeof article.title == 'string' && article.title.trim() != '';
+  const hasContent =
+    typeof article.content == 'string' && article.content.trim() != '';
+  return hasTitle && hasContent;
+}
+
 router.get('/', (req, res) => {
   querries.getAll().then(articles => {
     res.json(articles);
@@ -27,6 +35,16 @@ router.get('/:id', isValidId, (req, res, next) => {
       next();
     }
   });
+});
+
+router.post('/', (req, res, next) => {
+  if (validArticle(req.body)) {
+    querries.create(req.body).then(article => {
+      res.json(article[0]);
+    });
+  } else {
+    res.json({ error });
+  }
 });
 
 module.exports = router;

@@ -8,5 +8,8 @@ module.exports = {
     return knex('articles')
       .where('id', id)
       .first();
+  },
+  create(article) {
+    return knex('articles').insert(article, '*');
   }
 };
