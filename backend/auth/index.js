@@ -1,5 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const User = require('../db/userQueries');
 
@@ -71,10 +72,18 @@ router.post('/signin', (req, res, next) => {
         bcrypt.compare(req.body.password, user.password).then(result => {
           // if the passwords matched...
           if (result) {
-            res.json({
-              result,
-              message: 'Logged in!! 🔓'
-            });
+            jwt.sign(
+              { user },
+              'secretkey',
+              { expiresIn: '1h' },
+              (err, token) => {
+                res.json({
+                  token,
+                  result,
+                  message: 'Logged in!! 🔓'
+                });
+              }
+            );
           } else {
             next(new Error('Invalid login details!!'));
           }
@@ -92,4 +101,29 @@ router.post('/signin', (req, res, next) => {
   }
 });
 
-module.exports = router;
+function verifyToken(req, res, next) {
+  // Get the auth header vaue
+  // Token Format => Authorization: Bearer <access_token>
+  const bearerHeader = req.headers['authorization'];
+  // Check if bearer is defined
+  if (typeof bearerHeader !== 'undefined') {
+    //Split at the space btn Bearer and <access_token>
+    const bearer = bearerHeader.split(' ');
+    // Get token from array
+    const bearerToken = bearer[1];
+    // Set the token
+    req.token = bearerToken;
+    // Call next middleware
+    next();
+  } else {
+    // Forbidden
+    res.json({
+      Error: 'Forbidden!! Please log in!!'
+    });
+  }
+}
+
+module.exports = {
+  router,
+  verifyToken
+};

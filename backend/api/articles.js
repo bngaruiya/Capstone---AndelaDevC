@@ -1,8 +1,10 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 
 const router = express.Router();
 
 const querries = require('../db/articleQueries');
+const verifyToken = require('../auth/index').verifyToken;
 
 function isValidId(req, res, next) {
   if (!isNaN(req.params.id)) {
@@ -20,48 +22,91 @@ function validArticle(article) {
   return hasTitle && hasContent;
 }
 
-router.get('/', (req, res) => {
-  querries.getAll().then(articles => {
-    res.json(articles);
-  });
-});
-
-router.get('/:id', isValidId, (req, res, next) => {
-  querries.getOne(req.params.id).then(article => {
-    if (article) {
-      res.json(article);
+router.get('/', verifyToken, (req, res) => {
+  jwt.verify(req.token, 'secretkey', (err, authData) => {
+    if (err) {
+      res.json({
+        message: 'Forbidden. Please Log in'
+      });
     } else {
-      res.status(404);
-      next();
+      querries.getAll().then(articles => {
+        res.json(articles);
+      });
     }
   });
 });
 
-router.post('/', (req, res, next) => {
-  if (validArticle(req.body)) {
-    querries.create(req.body).then(article => {
-      res.json(article[0]);
-    });
-  } else {
-    res.json({ error });
-  }
+router.get('/:id', isValidId, verifyToken, (req, res, next) => {
+  jwt.verify(req.token, 'secretkey', (err, authData) => {
+    if (err) {
+      res.json({
+        message: 'Forbidden. Please Log in'
+      });
+    } else {
+      querries.getOne(req.params.id).then(article => {
+        if (article) {
+          res.json(article);
+        } else {
+          res.status(404);
+          next();
+        }
+      });
+    }
+  });
 });
 
-router.put('/:id', isValidId, (req, res, next) => {
-  if (validArticle(req.body)) {
-    querries.update(req.params.id, req.body).then(article => {
-      res.json(article[0]);
-    });
-  } else {
-    next(new Error('Invalid Article'));
-  }
+router.post('/', verifyToken, (req, res, next) => {
+  jwt.verify(req.token, 'secretkey', (err, authData) => {
+    if (err) {
+      res.json({
+        message: 'Forbidden. Please Log in'
+      });
+    } else {
+      if (validArticle(req.body)) {
+        querries.create(req.body).then(article => {
+          res.json({
+            article: article[0],
+            authData
+          });
+        });
+      } else {
+        res.json({ error });
+      }
+    }
+  });
+});
+
+router.put('/:id', isValidId, verifyToken, (req, res, next) => {
+  jwt.verify(req.token, 'secretkey', (err, authData) => {
+    if (err) {
+      res.json({
+        message: 'Forbidden. Please Log'
+      });
+    } else {
+      if (validArticle(req.body)) {
+        querries.update(req.params.id, req.body).then(article => {
+          res.json(article[0]);
+        });
+      } else {
+        next(new Error('Invalid Article'));
+      }
+    }
+  });
 });
 
 router.delete('/:id', isValidId, (req, res, next) => {
-  querries.delete(req.params.id).then(() => {
-    res.json({
-      deleted: true
-    });
+  jwt.verify(req.token, 'secretkey', (err, authData) => {
+    if (err) {
+      res.json({
+        message: 'Forbidden. Please Log'
+      });
+    } else {
+      querries.delete(req.params.id).then(() => {
+        res.json({
+          deleted: true
+        });
+      });
+    }
   });
 });
 
